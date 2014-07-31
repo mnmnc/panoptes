@@ -19,7 +19,7 @@ Script parses paths specified, lists all files and creates their hashes. Hashes 
 There are multiple arguments that can be used to modify the script behavior.
  - `-p --path` is accepting paths as an extension to those specified in the paths variable inside the script
  - `-v --verbose` causes script to show all files that passed the check. By default only failures are displayed.
- - `-d --details` causes script to show details of failures. Details contain hashes, dates and sizes of files.
+ - `-d --details` causes script to show details of failures. Details contain hashes (truncated), dates and sizes of files.
  - `-o --override` allows to force the script to override the database, saving new index as database.
 
 ```
