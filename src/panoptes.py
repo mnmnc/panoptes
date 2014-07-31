@@ -11,18 +11,21 @@ from functools import partial
 from colorama import init, Fore, Back, Style
 
 # VARIABLES
-
-paths = ["/bin", "/sbin"]
+#paths = ["/bin", "/sbin", "/usr/bin", "/usr/sbin", "/boot"]
+paths = ["/bin"]
 outfile = "ids.db"
 newfile = "ids.tmp"
+files_modified = 0
+files_processed = 0
 fail = "["+ Fore.RED+Style.BRIGHT+" FAIL "+ Fore.RESET + Style.NORMAL + "]"
 succ = "["+ Fore.GREEN+Style.BRIGHT+" SUCC "+ Fore.RESET + Style.NORMAL + "]"
-info = "["+ Fore.CYAN+Style.BRIGHT+" INFO "+ Fore.RESET + Style.NORMAL + "]"
+info = "["+ Style.BRIGHT+" INFO " + Style.NORMAL + "]"
 warn = "["+ Fore.YELLOW+Style.DIM+" WARN "+ Fore.RESET + Style.NORMAL + "]"
 chce = "["+ Fore.YELLOW+Style.BRIGHT+" CHCE "+ Fore.RESET + Style.NORMAL + "]"
 fovr = "["+ Fore.WHITE+Style.BRIGHT+" FOVR "+ Fore.RESET + Style.NORMAL + "]"
 
 def nparse():
+	"""Parses arguments"""
 	usage = " panoptes.py [-v | --verbose | -s | --silent | -p | --paths ]"
 	parser = argparse.ArgumentParser(description=usage)
 	parser.add_argument('-v', "--verbose", action='store_true', default=False, help='Show output for files that passed the integrity check.')
@@ -32,8 +35,12 @@ def nparse():
 	args = parser.parse_args()
 	return args
 
+def summary():
+	print(info + " Files modified: " + str(files_modified))
+	print(info + " Files analyzed: " + str(files_processed))
 
 def fix( my_string, size ):
+	"""Makes strings to be fixed in length"""
 	if len(my_string) > size:
 		return my_string[:size]
 	else:
@@ -43,6 +50,7 @@ def fix( my_string, size ):
 		return result
 
 def md5sum(filename):
+	"""Calculating hash."""
 	with open(filename, mode='rb') as f:
 		d = hashlib.sha256()
 		for buf in iter(partial(f.read, 128), b''):
@@ -90,6 +98,8 @@ def create_index():
 
 def validate_index():
 	global args
+	global files_modified 
+	global files_processed
 
 	if check_file_size(outfile) == 0:
 		print( info + " DB not found. Creating new one.")
@@ -103,6 +113,7 @@ def validate_index():
 		hash_error_count = 0
 
 		for row in db_list:
+			files_processed = files_processed + 1
 			for inner in new_list:
 				if row[0] == inner[0]:
 					if row[1] == inner[1]:
@@ -110,6 +121,7 @@ def validate_index():
 							print( succ + " Hash check for: ", fix(row[0], 30) )
 
 					else:
+						files_modified = files_modified + 1
 						if args.details == True:
 							hash_was = "Hash was: " + row[1]
 							hash_is = " Hash is: " + inner[1]
@@ -149,6 +161,7 @@ def main():
 	args = nparse()
 	create_index()
 	validate_index()
+	summary()
 
 if __name__ == "__main__":
 	main()
