@@ -40,11 +40,12 @@ optional arguments:
 ```
 
 ### Example output
+
 Failure:
-!(https://raw.githubusercontent.com/mnmnc/img/master/panoptes.jpg)[Panoptes failure. File modification detected]
+![Panoptes failure. File modification detected](https://raw.githubusercontent.com/mnmnc/img/master/panoptes.jpg)
 
 Success with `-v`
-!(Panoptes success with verbosity.)[https://raw.githubusercontent.com/mnmnc/img/master/panoptes2.jpg]
+![Panoptes success with verbosity.](https://raw.githubusercontent.com/mnmnc/img/master/panoptes2.jpg)
 
 ### Database
 Database is a simple csv file. Example content:
