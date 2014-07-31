@@ -3,13 +3,13 @@ panoptes
 
 Panoptes (Ancient Greek: Πανόπτης; English translation: "the all-seeing")
 
-What it it?
+### What it it?
 Operating system integrity checks made easy.
 
-How does it work?
+### How does it work?
 This is a python script that parses 
 
-Capabilities:
+### Capabilities:
 ```
 usage: panoptes.py [-h] [-v] [-d] [-o]
                    [-p [additional_paths [additional_paths ...]]]
@@ -25,10 +25,9 @@ optional arguments:
                         will generate new hash values.
   -p [additional_paths [additional_paths ...]], --path [additional_paths [additional_paths ...]]
                         Include additional paths.
-
 ```
 
-TODO
+### TODO
   - multi-threading support
   - logo
   - stats per path
