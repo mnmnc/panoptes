@@ -41,7 +41,7 @@ optional arguments:
 
 ### Example output
 Failure:
-!(Panoptes failure. File modification detected)[https://raw.githubusercontent.com/mnmnc/img/master/panoptes.jpg]
+!(https://raw.githubusercontent.com/mnmnc/img/master/panoptes.jpg)[Panoptes failure. File modification detected]
 
 Success with `-v`
 !(Panoptes success with verbosity.)[https://raw.githubusercontent.com/mnmnc/img/master/panoptes2.jpg]
