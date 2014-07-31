@@ -126,11 +126,12 @@ def validate_index():
 
 						hash_error_count = hash_error_count + 1
 
-		print(" ")
+		print( info + " Hash check completed.")
 		if hash_error_count != 0:
 			print(  warn + Fore.YELLOW +  Style.DIM + " Modifications detected." + Fore.RESET + Style.NORMAL )
 			if args.override == True:
-				print( fovr + "Overriding database with new one.")
+				print( info + " Force override request detected.")
+				print( fovr + " Overriding database with new one.")
 				os.rename( newfile, outfile)
 			else:
 				override = input( chce + " Force update database? [y]es | [E]nter to cancel: ")
@@ -140,7 +141,7 @@ def validate_index():
 				else:
 					print( info + " Override canceled.")
 		else:
-			print( info + " System secure.")
+			print( succ + " System uncompromized. No changes detected.")
 			os.rename( newfile, outfile )
 
 def main():
