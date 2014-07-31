@@ -49,6 +49,15 @@ Success with `-v`
 
 ![Panoptes success with verbosity.](https://raw.githubusercontent.com/mnmnc/img/master/panoptes2.jpg)
 
+### Message types
+
+ - fail - FAILURE
+ - succ - SUCCESS
+ - info - NOTICE
+ - warn - WARNING
+ - chce - CHOICE GIVEN
+ - fovr - FORCED OVERRIDE (`-o` option used)
+
 ### Database
 Database is a simple csv file. Example content (`file_path`,`sha256`, `date`, `size`):
 ```
