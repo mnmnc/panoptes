@@ -50,7 +50,7 @@ Success with `-v`
 ![Panoptes success with verbosity.](https://raw.githubusercontent.com/mnmnc/img/master/panoptes2.jpg)
 
 ### Database
-Database is a simple csv file. Example content:
+Database is a simple csv file. Example content (`file_path`,`sha256`, `date`, `size`):
 ```
 "/bin/sh","bd07bdf3f6b871598977df9867eb59905511711c398bdc485734abc296762185","Fri Jan 10 11:14:07 2014","117176"
 "/bin/mt-gnu","8347fa915b1b0e372349e208f7ebf88201fc06888e85e76779dc318230dc3660","Thu Mar 27 04:34:02 2014","68760"
