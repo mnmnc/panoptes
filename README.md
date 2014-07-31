@@ -51,12 +51,12 @@ Success with `-v`
 
 ### Message types
 
- - fail - FAILURE
- - succ - SUCCESS
- - info - NOTICE
- - warn - WARNING
- - chce - CHOICE GIVEN
- - fovr - FORCED OVERRIDE (`-o` option used)
+ - FAIL - Failure
+ - SUCC - Success
+ - INFO - Notice
+ - WARN - Warning
+ - CHCE - Choice given
+ - FOVR - Forced override (`-o` option used)
 
 ### Database
 Database is a simple csv file. Example content (`file_path`,`sha256`, `date`, `size`):
