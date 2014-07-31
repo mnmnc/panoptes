@@ -1,7 +1,7 @@
 panoptes
 ========
 
-Panoptes (Ancient Greek: Πανόπτης; English translation: "the all-seeing")
+*Panoptes* (Ancient Greek: Πανόπτης; English translation: "the all-seeing")
 
 ### What it it?
 Operating system integrity checks made easy.
@@ -51,7 +51,7 @@ Success with `-v`
 
 ### Database
 Database is a simple csv file. Example content:
-"""
+```
 "/bin/sh","bd07bdf3f6b871598977df9867eb59905511711c398bdc485734abc296762185","Fri Jan 10 11:14:07 2014","117176"
 "/bin/mt-gnu","8347fa915b1b0e372349e208f7ebf88201fc06888e85e76779dc318230dc3660","Thu Mar 27 04:34:02 2014","68760"
 "/bin/mkdir","9abf4134b60de6e191718fdc2f4c840990de88cdee3fc40267d77c2a56f2c2a7","Sun Apr 13 01:34:44 2014","51848"
@@ -65,7 +65,7 @@ Database is a simple csv file. Example content:
 "/bin/loadkeys","1d662a74f7ce774869dbcec66a01fe76bb25422a383565814cfda8f7f83b3878","Sun Feb 17 19:39:45 2013","111328"
 "/bin/netstat","308e64331cf31be3585b10624a6a4e524feeb1c8443dccafdb0f060e8b9e8236","Mon May 12 07:13:50 2014","119528"
 "/bin/ls","2bd6d7448a604bd5f390327f5d8a8ff719e70e02195e1cfcb29ef89a96983666","Sun Apr 13 01:34:44 2014","109992"
-"""
+```
 
 ### TODO
   - multi-threading support
