@@ -4,6 +4,7 @@ import sys
 import time
 import hashlib
 import threading
+import multiprocessing
 from queue import Queue
 from functools import partial
 from colorama import init, Fore, Back, Style
@@ -11,6 +12,7 @@ from colorama import init, Fore, Back, Style
 lock = threading.Lock()
 listlock = threading.Lock()
 hashlock = threading.Lock()
+cpucount = multiprocessing.cpu_count()
 
 def gethash(filename, hash_designation="sha256"):
 	"""
@@ -281,7 +283,7 @@ def main():
 		print(i, notification[i])
 
 	# CREATE QUEUE | # OF THREADS AS PARAM
-	createqueue(1)
+	createqueue(cpucount)
 
 	# CREATE LISTS
 	createlists()
@@ -290,7 +292,7 @@ def main():
 	fillthequeue()
 
 	# CREATE HASH QUEUE
-	createhashqueue(1)
+	createhashqueue(cpucount)
 
 	# FILL HASH QUEUE
 	fillhashqueue()
