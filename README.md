@@ -77,7 +77,7 @@ Database is a simple csv file. Example content (`file_path`,`sha256`, `date`, `s
 ```
 
 ### TODO
-  - multi-threading support
+  - multi-threading support *(this is pretty much done but the code is in separate branch for now.)*
   - logo
   - stats per path
-  - oop
+  - oop *(I think I will drop this idea. Procedural code will be easier to maintain in such small project.)*
