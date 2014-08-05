@@ -16,6 +16,7 @@ csvlock = threading.Lock()
 listlock = threading.Lock()
 hashlock = threading.Lock()
 cpucount = multiprocessing.cpu_count()
+debug_time = 0
 
 def gethash(filename, hash_designation="sha256"):
 	"""
@@ -83,12 +84,14 @@ def parseargs():
 	"""
 		Parses arguments given to script.
 	"""
-	usage = " panoptes.py [-v | --verbose | -s | --silent | -p | --paths ]"
-	parser = argparse.ArgumentParser(description=usage)
+	description="This script performs hash verification of files located under paths specified. Compares the calculated hashes with the ones saved in database. If database does not exist, it will be created. "
+	parser = argparse.ArgumentParser()
 	parser.add_argument('-v', "--verbose", action='store_true', default=False, help='Show output for files that passed the integrity check.')
-	parser.add_argument('-d', "--details", action='store_true', default=False, help='Show detailed output for files that failed integrity check.')
-	parser.add_argument('-o', "--override", action='store_true', default=False, help='This forces the creation of new database if some files will generate new hash values.')
-	parser.add_argument('-p', "--path", metavar='additional_paths', default=[None], nargs='*', help='Include additional paths.')
+	parser.add_argument('-d', "--details", action='store_true', default=False, help='Show detailed output for files that failed integrity check.\n')
+	parser.add_argument('-o', "--override", action='store_true', default=False, help='This forces the creation of new database if some files will generate new hash values.\n')
+	parser.add_argument('-p', "--path", metavar='path', default=[None], nargs='*', help='Include additional paths.\n')
+	parser.add_argument('-t', "--threads", default=1, type=int, help='Specify number of threads prefered. By default a CPU detection is being used to determine the optimal value.\n' )
+	parser.add_argument('-w', "--write", default=None, metavar='database_file', help="Specify different database file. If nonexistent it will be created.")
 	args = parser.parse_args()
 	return args
 
@@ -213,17 +216,15 @@ def createindex(outfile, path):
 	with listlock:
 		addtofilelist(_mylist)
 
-	
-
 def getfiledetails(filename):
 	_name = ""
 	_csv = ""
 	with lock:
 		_name = threading.current_thread().name
 	try:
-
+		#
 		_hash = gethash(filename)
-
+		#
 		_time = time.ctime(os.path.getmtime(filename))
 		_size = str(os.stat(filename).st_size)
 		_csv = [filename, _hash, _time, _size]
@@ -244,19 +245,21 @@ def worker():
 		queue.task_done()
 
 def hashworker():
-
+	global debug_time
 	_csv = []
 	_name = ""
 	with lock:
 		_name = threading.current_thread().name
-
 	while True:
 		item = hashqueue.get()
 		print("  ",notification["INFO"], (_name).upper(), "\tASSIGNED", len(item), "FILES TO CALCULATE HASHES")
 		for _file in item:
+
 			_line = getfiledetails(_file)
+
 			if _line != None:
 				_csv.append(_line)
+				
 		hashqueue.task_done()
 		with hashlock:
 			for line in _csv:
@@ -286,10 +289,11 @@ def csvworker():
 				if row[0] == _row[0]:
 					if row[1] == _row[1]:
 						if args.verbose == True:
-							print("  ",notification["SUCC"], "HASH CHCEK FOR:", fix(row[0], 100)  )
+							print("  ",notification["SUCC"], "HASH CHCEK FOR:", fix(row[0], 30)  )
 
 					else:
-						print("  ",notification["FAIL"], "HASH CHCEK FOR:", fix(row[0], 100)  )
+						print("  ",notification["FAIL"], "HASH CHCEK FOR:", fix(row[0], 30), )
+
 						hash_error_count = hash_error_count + 1
 						if args.details == True:
 							hash_was = "Hash was: " + row[1]
@@ -308,24 +312,26 @@ def csvworker():
 
 def verifystatus():
 	global hash_error_count
-	global args # CHECK IF NECESSARY
 
 	if hash_error_count != 0:
-		print(  notification["WARN"], colorstring( "Modifications detected.", "yellow", "dim"))
+		print(  notification["WARN"], colorstring( "MODIFICATIONS DETECTED.", "yellow", "dim"))
 		if args.override == True:
-			print( notification["INFO"], " Force override request detected.")
-			print( notification["FOVR"], " Overriding database with new one.")
-			#os.rename( newfile, outfile)
+			print( notification["INFO"], "FORCE OVERRIDE REQUEST DETECTED.")
+			print( notification["FOVR"], "OVERRIDING DATABASE WITH NEW ONE.")
+			savedb()
+			
 		else:
-			override = input( notification["CHCE"] + " Force update database? [y]es | [E]nter to cancel: ")
+			override = input( notification["CHCE"] + " FORCE UPDATE DATABASE? [y]es | any key to cancel: ")
 			if override == "y":
-				print( notification["INFO"], " Overriding database with new one.")
-				#os.rename( newfile, outfile)
+				print( notification["INFO"], "OVERRIDING DATABASE WITH NEW ONE.")
+				savedb()
+				
 			else:
-				print( notification["INFO"], " Override canceled.")
+				print( notification["INFO"], "OVERRIDE CANCELLED.")
 	else:
-		print( notification["SUCC"], " System uncompromized. No changes detected.")
-		#os.rename( newfile, outfile )
+		print( notification["SUCC"], "SYSTEM UNCOMPROMIZED. NO CHANGES DETECTED.")
+		savedb()
+		
 
 def createqueue(number_of_threads):
 	globals()['queue'] = Queue()
@@ -353,19 +359,24 @@ def createcsvqueue(number_of_threads):
 		_thread.start()
 
 def fillthequeue():
+
 	for path in paths:
 		queue.put(path)
 	queue.join()
 	print("  ",notification["INFO"], colorstring("TERMINATING THREADS", "green", "bright"))
 
+
 def fillhashqueue():
-	for i in range(0, len(filelist),200):
-		_smalllist = list(filelist[i:i+200])
+
+	for i in range(0, len(filelist),1):
+		_smalllist = list(filelist[i:i+1])
 		hashqueue.put(_smalllist)
 	hashqueue.join()
 	print("  ",notification["INFO"], colorstring("TERMINATING THREADS", "green", "bright"))
 
+
 def fillcsvqueue(number_of_threads):
+
 	total_size = len(hcsv)
 	for i in range(0, len(hcsv), int(total_size/number_of_threads)):
 		_smalllist = list(hcsv[i:i+(int(total_size/number_of_threads))])
@@ -373,6 +384,7 @@ def fillcsvqueue(number_of_threads):
 		
 	csvqueue.join()
 	print("  ",notification["INFO"], colorstring("TERMINATING THREADS", "green", "bright"))
+
 
 def createvars():
 	globals()['filelist'] = []
@@ -383,6 +395,33 @@ def createvars():
 	globals()['files_processed'] = 0
 	globals()['hash_error_count'] = 0
 
+def savedb():
+	db = None
+	global outfile
+	if args.write != None:
+		outfile = str(args.write)
+		print(notification["INFO"], "DATABASE CHANGED BY USER:", str(outfile))
+	else:
+		print(notification["INFO"], "DEFAULT DATABASE WILL BE USED: ", str(outfile))
+
+	try:
+		db = open(outfile, mode='w')
+	except:
+		print(notification["FAIL"], "ERROR WHILE TRYING TO SAVE DATABASE.")
+
+	for row in hcsv:
+		line = "\"" + row[0] + "\",\"" + row[1] + "\",\"" + row[2] + "\",\"" + row[3] + "\",\n"
+		db.write(line)
+	print(notification["SUCC"], "DATABASE SAVED SUCCESSFULLY.")
+	db.close()
+
+def verifythreadcount():
+	global cpucount
+	if args.threads != 0:
+		cpucount = int(args.threads)
+		print(notification["INFO"], "NUMBER OF THREADS SPECIFIED BY USER:", str(cpucount))
+	else:
+		print(notification["INFO"], "NUMBER OF THREADS DETECTED AUTOMATICALLY:", str(cpucount))
 
 def addtofilelist(_list):
 	for item in _list:
@@ -418,21 +457,6 @@ def check_file_size(filename):
 	return result
 
 
-
-def validate_system():
-	global args
-	if check_file_size(outfile) == 0:
-		print( info + " DB not found. Creating new one.")
-		#os.rename( newfile, outfile)
-	else:
-		print( info + " DB found. Comparison in progress.")
-		db_list = list(csv.reader(open(outfile), delimiter=',', quotechar='"'))
-
-		hash_error_count = 0
-
-		for row in db_list:
-			files_processed = files_processed + 1
-
 def main():
 	global args
 	args = parseargs()
@@ -444,8 +468,9 @@ def main():
 	start = marktime()
 
 	# PATHS SELECTED BY DEFAULT
-	local_paths = ["/bin", "/sbin", "/usr/bin", "/usr/sbin", "/boot", "/var/log"]
-	
+	#local_paths = ["/bin", "/sbin", "/usr/bin", "/usr/sbin", "/boot", "/var/log"]
+	local_paths = ["/var/vm/debian_base", "/var/vm/debian_base2", "/var/vm/debian_base3"]
+
 	# PARSING CHOOSEN PATHS
 	print(notification["FAZE"], "ADDING PATHS")
 	createpaths(local_paths)
@@ -453,6 +478,9 @@ def main():
 
 	# CHECK PATHS
 	showpaths()
+
+	# VERIFY THREADS
+	verifythreadcount()
 
 	# CREATE QUEUE | # OF THREADS AS PARAM
 	print(notification["FAZE"], "CREATING FILE LIST")
@@ -478,6 +506,9 @@ def main():
 	# FILL CSV QUEUE
 	fillcsvqueue(cpucount)
 
+	# EXECUTION TIME
+	print(notification["FAZE"],"EXECUTED IN:", marktime()-start)
+
 	# STATUS
 	verifystatus()
 
@@ -487,9 +518,6 @@ def main():
 	#printfilelist()
 	#printcsvlist()
 	#printhashlist()
-
-	# CHECKING EXECUTION TIME
-	print("executed in:", marktime()-start)
 
 if __name__ == "__main__":
 	main()
