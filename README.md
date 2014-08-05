@@ -4,7 +4,7 @@ panoptes
 *Panoptes* (Ancient Greek: Πανόπτης; English translation: "the all-seeing")
 
 
-### What it it?
+### What is it?
 =======
 
 Operating system integrity checks made easy.
