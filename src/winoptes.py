@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# Imports
 import os
 import hashlib
 import time
@@ -10,9 +11,9 @@ from colorama import init, Fore, Back, Style
 
 # VARIABLES
 #paths = ["/bin", "/sbin", "/usr/bin", "/usr/sbin", "/boot"]
-paths = ["/bin"]
-outfile = "ids.db"
-newfile = "ids.tmp"
+paths = ["D:\Work\scripts"]
+outfile = "D:\TMP\ids.db"
+newfile = "D:\TMP\ids.tmp"
 files_modified = 0
 files_processed = 0
 fail = "["+ Fore.RED+Style.BRIGHT+" FAIL "+ Fore.RESET + Style.NORMAL + "]"
@@ -22,9 +23,19 @@ warn = "["+ Fore.YELLOW+Style.DIM+" WARN "+ Fore.RESET + Style.NORMAL + "]"
 chce = "["+ Fore.YELLOW+Style.BRIGHT+" CHCE "+ Fore.RESET + Style.NORMAL + "]"
 fovr = "["+ Fore.WHITE+Style.BRIGHT+" FOVR "+ Fore.RESET + Style.NORMAL + "]"
 
+# Functions
+
+def md5sum(filename):
+	"""Calculating hash."""
+	with open(filename, mode='rb') as f:
+		d = hashlib.sha256()
+		for buf in iter(partial(f.read, 128), b''):
+			d.update(buf)
+	return d.hexdigest()
+
 def nparse():
 	"""Parses arguments"""
-	usage = " panoptes.py [-v | --verbose | -s | --silent | -p | --paths ]"
+	usage = " winoptes.py [-v | --verbose | -s | --silent | -p | --paths ]"
 	parser = argparse.ArgumentParser(description=usage)
 	parser.add_argument('-v', "--verbose", action='store_true', default=False, help='Show output for files that passed the integrity check.')
 	parser.add_argument('-d', "--details", action='store_true', default=False, help='Show detailed output for files that failed integrity check.')
@@ -32,6 +43,10 @@ def nparse():
 	parser.add_argument('-p', "--path", metavar='additional_paths', default=[None], nargs='*', help='Include additional paths.')
 	args = parser.parse_args()
 	return args
+
+def open_file(filename):
+	of = open(filename, 'w')
+	return of
 
 def summary():
 	print(info + " Files modified: " + str(files_modified))
@@ -47,61 +62,16 @@ def fix( my_string, size ):
 			result += " "
 		return result
 
-def md5sum(filename):
-	"""Calculating hash."""
-	with open(filename, mode='rb') as f:
-		d = hashlib.sha256()
-		for buf in iter(partial(f.read, 128), b''):
-			d.update(buf)
-	return d.hexdigest()
-
-def check_file_size(filename):
-	result = 0
-	try:
-		result = os.stat(filename).st_size
-	except FileNotFoundError:
-		result = 0
-	return result
-
-def open_file(filename):
-	of = open(filename, 'w')
-	return of
-
-def create_index():
-	global args
-	
-	of = open_file(newfile)
-
-	if len(args.path) > 0:
-		for p in args.path:
-			if p != None:
-				paths.append(p)
-
-	print( info + " Creating current verification index.")
-	for path in paths:
-		print( info + " Processing path ", path)
-		for root, dirs, files in os.walk(path):
-			for file in files:
-				f = root + "/" +file
-				
-				try:
-					of.write( "\"" + os.path.join(root, file) + \
-						"\",\"" + md5sum(os.path.join(root, file)) + \
-						"\",\"" + time.ctime(os.path.getmtime(f)) + \
-						"\",\"" + str(os.stat(f).st_size) + "\"\n")
-				except:
-					pass
-
-	of.close()
-
 def validate_index():
 	global args
-	global files_modified 
+	global files_modified
 	global files_processed
 
 	if check_file_size(outfile) == 0:
 		print( info + " DB not found. Creating new one.")
+
 		os.rename( newfile, outfile)
+
 	else:
 		print( info + " DB found. Comparison in progress.")
 
@@ -152,9 +122,48 @@ def validate_index():
 					print( info + " Override canceled.")
 		else:
 			print( succ + " System uncompromized. No changes detected.")
+			os.remove( outfile)
 			os.rename( newfile, outfile )
 
+
+def check_file_size(filename):
+	result = 0
+	try:
+		result = os.stat(filename).st_size
+	except FileNotFoundError:
+		result = 0
+	return result
+
+def create_index():
+	global args
+
+	of = open_file(newfile)
+
+	if len(args.path) > 0:
+		for p in args.path:
+			if p != None:
+				paths.append(p)
+
+	print( info + " Creating current verification index.")
+	for path in paths:
+		print( info + " Processing path ", path)
+		for root, dirs, files in os.walk(path):
+			for file in files:
+				f = root + "/" +file
+
+				try:
+					of.write( "\"" + os.path.join(root, file) + \
+						"\",\"" + md5sum(os.path.join(root, file)) + \
+						"\",\"" + time.ctime(os.path.getmtime(f)) + \
+						"\",\"" + str(os.stat(f).st_size) + "\"\n")
+				except:
+					pass
+
+	of.close()
+
+
 def main():
+	print("Executing")
 	global args
 	args = nparse()
 	create_index()
