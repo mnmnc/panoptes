@@ -25,7 +25,7 @@ There are multiple arguments that can be used to modify the script behavior.
  - `-d --details` causes script to show details of failures. Details contain hashes (truncated), dates and sizes of files.
  - `-o --override` allows to force the script to override the database, saving new index as database.
 
-```
+```bash
 usage: panoptes.py [-h] [-v] [-d] [-o]
                    [-p [additional_paths [additional_paths ...]]]
 
